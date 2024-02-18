@@ -1,6 +1,6 @@
 import time
 import argparse
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 
 parser = argparse.ArgumentParser(description="devuploads")
 parser.add_argument("-u", "--url", help="url")
@@ -25,9 +25,14 @@ def run(playwright, url):
     else:
         browser = playwright.firefox.launch()
 
-    page = browser.new_page()
+    context = browser.new_context(ignore_https_errors=True)
+    page = context.new_page()
     page.goto(url, referer=url)
-    page.get_by_role("button", name="Generate Download Link").click()
+    try:
+        page.get_by_role("button", name="Generate Download Link").click(timeout=2000)
+    except TimeoutError:
+        page.get_by_role("button", name="Consent", exact=True).click(timeout=2000)
+        page.get_by_role("button", name="Generate Download Link").click(timeout=5000)
     page.get_by_role("button", name="Link Generated!").click(trial=True)
     time.sleep(2)
     page.get_by_role("button", name="Link Generated!").click()
@@ -41,6 +46,7 @@ def run(playwright, url):
     page.route("https://*/d/**", lambda r: add_job(r, filename))
     page.get_by_text("Download Now").click()
     print(f"'{filename}' {filesize}")
+    browser.close()
 
 
 if args.url:
