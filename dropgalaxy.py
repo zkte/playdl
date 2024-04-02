@@ -37,6 +37,8 @@ def adkill(p):
 def run(playwright, url):
     prefs = {
         "dom.webnotifications.enabled": False,
+        "media.autoplay.default": 5,
+        "permissions.default.image": 3,
         "security.OCSP.enabled": 0,
         "media.webspeech.synth.enabled": False,
         "browser.eme.ui.enabled": False,
@@ -64,7 +66,7 @@ def run(playwright, url):
     wait = page.get_by_text(re.compile("Wait"))
     while True:
         with suppress(TimeoutError):
-            ready.click(timeout=1000)
+            ready.click(force=True, timeout=1000)
         with suppress(TimeoutError):
             if wait.is_enabled(timeout=1000):
                 break
