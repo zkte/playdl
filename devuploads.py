@@ -21,7 +21,7 @@ def add_job(route, filename):
 
 def run(playwright, url):
     if args.proxy:
-        browser = playwright.firefox.launch(proxy={"server": args.proxy})
+        browser = playwright.firefox.launch(headless=False, proxy={"server": args.proxy})
     else:
         browser = playwright.firefox.launch()
 
@@ -29,10 +29,10 @@ def run(playwright, url):
     page = context.new_page()
     page.goto(url, referer=url)
     try:
-        page.get_by_role("button", name="Generate Download Link").click(timeout=2000)
+        page.get_by_role("button", name="Generate Free Download Link").click(timeout=5000)
     except TimeoutError:
         page.get_by_role("button", name="Consent", exact=True).click(timeout=2000)
-        page.get_by_role("button", name="Generate Download Link").click(timeout=5000)
+        page.get_by_role("button", name="Generate Free Download Link").click(timeout=5000)
     page.get_by_role("button", name="Link Generated!").click(trial=True)
     time.sleep(2)
     page.get_by_role("button", name="Link Generated!").click()

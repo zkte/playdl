@@ -33,6 +33,8 @@ ALLOW = [
     "static.a-ads.com",
     "srtb.msn.com",
     "adoto.net",
+    "pagead2.googlesyndication.com",
+    "cdn.ampproject.org",
 ]
 
 downloads = asyncio.Queue()
@@ -46,6 +48,7 @@ async def on_request(data: InterceptedRequest):
         else:
             await data.continue_request(intercept_response=False)
     elif urlparse(data.request.url).netloc in ALLOW:
+        # print(f"{data.request.method} {data.request.url}")
         await data.continue_request(intercept_response=False)
     else:
         # print(data.request.url)
