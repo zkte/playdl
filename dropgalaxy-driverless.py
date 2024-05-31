@@ -25,6 +25,7 @@ ALLOW = [
     "challenges.cloudflare.com",
     "cdn.jsdelivr.net",
     "financemonk.net",
+    "tmp.financemonk.net",
     "tpc.googlesyndication.com",
     "googleads.g.doubleclick.net",
     "securepubads.g.doubleclick.net",
@@ -59,6 +60,7 @@ async def main():
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument("--headless=new")
+    # options.add_argument("--user-data-dir=/tmp/drl")
     if args.proxy:
         options.add_argument(f"--proxy-server={args.proxy}")
     async with webdriver.Chrome(options=options) as driver:
@@ -66,6 +68,12 @@ async def main():
             driver, on_request=on_request, patterns=[RequestPattern.AnyRequest]
         ) as interceptor:
             await driver.get(args.url, wait_load=True)
+            name_h1 = await driver.find_element(By.CSS, ".name > h1")
+            filename = await name_h1.text
+            name_b = await driver.find_elements(By.CSS, ".name b")
+            f_date = await name_b[0].text
+            f_size = await name_b[1].text
+            print(f"{filename} {f_size} {f_date}")
             tab = driver.current_target.id
             dl_button = await driver.find_element(By.CSS, "#method_free2", timeout=10)
             await dl_button.click()
@@ -90,9 +98,8 @@ async def main():
                 if "ready!" in t:
                     await dlbtn.click(move_to=True)
                 await driver.sleep(1)
-            h1 = await driver.find_element(By.CSS, ".name > h1", timeout=10)
-            filename = await h1.text
             final_dl = await driver.find_element(By.CSS, "#dl", timeout=10)
+            await final_dl.scroll_to()
             while True:
                 try:
                     if await final_dl.is_displayed():
@@ -100,13 +107,16 @@ async def main():
                 except StaleElementReferenceException:
                     break
             url = await downloads.get()
-            print(url)
-            print(filename)
-    fn = sanitize_filename(filename.strip())
-    with open(f"{fn}.crawljob", "w+") as f:
+            print(f"Direct: {url}")
+    crawljob = f"{sanitize_filename(filename.strip())}.crawljob"
+    print(f"JD Folder Watch: '{crawljob}'")
+    with open(crawljob, "w+") as f:
         f.write(f"text={url}\n")
         f.write(f"filename={filename}\n")
+        f.write(f"comment={args.url}\n")
         f.write("autoConfirm=TRUE\n")
+        f.write("autoStart=TRUE\n")
+        f.write("chunks=1\n")
 
 
 if args.url:
