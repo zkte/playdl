@@ -36,6 +36,8 @@ ALLOW = [
     "adoto.net",
     "pagead2.googlesyndication.com",
     "cdn.ampproject.org",
+    "blockadsnot.com",
+    "www.blockadsnot.com",
 ]
 
 downloads = asyncio.Queue()
@@ -92,7 +94,7 @@ async def main():
                 t = await tokennstatus.text
                 print(t, end="\r")
                 if "verify you are human" in t:
-                    cfcaptcha = await driver.find_element(By.CSS, "#cfcaptcha > iframe", timeout=10)
+                    cfcaptcha = await driver.find_element(By.CSS, "#cfcaptcha", timeout=10)
                     await cfcaptcha.click(move_to=True)
                     await driver.switch_to.target(tab, activate=True)
                 if "ready!" in t:
