@@ -62,7 +62,8 @@ async def main():
             name_b = await driver.find_elements(By.CSS, ".name span")
             f_date = await name_b[0].text
             f_size = await name_b[1].text
-            print(f"{filename.strip()} {f_size.strip()} {f_date.replace("\n", "").strip()}")
+            u_date = " ".join(f_date.split())
+            print(f"{filename.strip()} {f_size.strip()} {u_date}")
             dl_button = await driver.find_element(By.CSS, "#downloadbtnf", timeout=10)
             while True:
                 try:
@@ -96,7 +97,7 @@ async def main():
     print(f"JD Folder Watch: '{crawljob}'")
     with open(crawljob, "w+") as f:
         f.write(f"text={url}\n")
-        f.write(f"filename={filename}\n")
+        f.write(f"filename={filename.strip()}\n")
         f.write(f"comment={args.url}\n")
         f.write("autoConfirm=TRUE\n")
         f.write("autoStart=TRUE\n")
