@@ -7,6 +7,9 @@ from selenium_driverless.types.webelement import StaleElementReferenceException
 from selenium_driverless.scripts.network_interceptor import NetworkInterceptor, InterceptedRequest, RequestPattern
 from urllib.parse import urlparse
 from pathvalidate import sanitize_filename
+import warnings
+
+warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser(description="devuploads")
 parser.add_argument("-u", "--url", help="url")
@@ -67,7 +70,8 @@ async def main():
             dl_button = await driver.find_element(By.CSS, "#downloadbtnf", timeout=10)
             while True:
                 try:
-                    if await dl_button.is_displayed():
+                    await dl_button.scroll_to()
+                    if await dl_button.is_visible():
                         await dl_button.click()
                         break
                 except StaleElementReferenceException:
@@ -78,7 +82,7 @@ async def main():
                 if "Generated" in t:
                     print(t)
                     try:
-                        if await dl_button2.is_displayed():
+                        if await dl_button2.is_visible():
                             await dl_button2.click()
                             break
                     except StaleElementReferenceException:
@@ -87,12 +91,14 @@ async def main():
             await final_dl.scroll_to()
             while True:
                 try:
-                    if await final_dl.is_displayed():
+                    if await final_dl.is_visible():
                         await final_dl.click()
                 except StaleElementReferenceException:
                     break
-            url = await downloads.get()
-            print(f"Direct: {url}")
+                url = await downloads.get()
+                print(f"Direct: {url}")
+                if url:
+                    break
     crawljob = f"{sanitize_filename(filename.strip())}.crawljob"
     print(f"JD Folder Watch: '{crawljob}'")
     with open(crawljob, "w+") as f:
