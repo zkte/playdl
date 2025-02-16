@@ -67,7 +67,7 @@ async def main():
             f_size = await name_b[1].text
             u_date = " ".join(f_date.split())
             print(f"{filename.strip()} {f_size.strip()} {u_date}")
-            dl_button = await driver.find_element(By.CSS, "#downloadbtnf", timeout=10)
+            dl_button = await driver.find_element(By.CSS, "#gdl", timeout=20)
             while True:
                 try:
                     await dl_button.scroll_to()
@@ -76,18 +76,30 @@ async def main():
                         break
                 except StaleElementReferenceException:
                     break
-            dl_button2 = await driver.find_element(By.CSS, "#downloadbtn", timeout=10)
+            pwtime = await driver.find_element(By.CSS, "#pwtime", timeout=10)
             while True:
-                t = await dl_button2.text
-                if "Generated" in t:
-                    print(t)
-                    try:
-                        if await dl_button2.is_visible():
-                            await dl_button2.click()
-                            break
-                    except StaleElementReferenceException:
+                t = await pwtime.text
+                if "Generating" in t:
+                    break
+            while True:
+                try:
+                    if await pwtime.is_visible():
+                        t = await pwtime.text
+                        print(t + 10 * " ", end="\r")
+                    else:
                         break
-            final_dl = await driver.find_element(By.CSS, "#dlbtn", timeout=10)
+                except StaleElementReferenceException:
+                    break
+            dl_button2 = await driver.find_element(By.CSS, "#gdlf", timeout=10)
+            while True:
+                try:
+                    await dl_button2.scroll_to()
+                    if await dl_button2.is_visible():
+                        await dl_button2.click()
+                        break
+                except StaleElementReferenceException:
+                    break
+            final_dl = await driver.find_element(By.CSS, "#dln", timeout=10)
             await final_dl.scroll_to()
             while True:
                 try:
@@ -102,7 +114,7 @@ async def main():
     crawljob = f"{sanitize_filename(filename.strip())}.crawljob"
     print(f"JD Folder Watch: '{crawljob}'")
     with open(crawljob, "w+") as f:
-        f.write(f"text={url}\n")
+        f.write(f"text=directhttp://{url}\n")
         f.write(f"filename={filename.strip()}\n")
         f.write(f"comment={args.url}\n")
         f.write("autoConfirm=TRUE\n")
